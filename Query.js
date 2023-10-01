@@ -1,14 +1,20 @@
 const mongoose = require('mongoose')
-const uri = "mongodb+srv://mobinulislam:8NWFTTL3vZqC2W0L@cluster0.mskd8ua.mongodb.net/"
-mongoose.connect(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
-.then(()=> {
-    console.log('Mongoose is connect')
-}).catch((err) => {
-    console.log(err)
-})
+const connectDB = async () => {
+    try{
+        const uri = "mongodb+srv://mobinulislam:8NWFTTL3vZqC2W0L@cluster0.mskd8ua.mongodb.net/"
+        mongoose.connect(uri, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        })
+        console.log('Mongoose is connect')
+
+        
+    }   catch(err){
+        console.log(err)
+    } 
+
+}
+
 const sampleSchema = new mongoose.Schema({
     name: {type: String, required: true, unique: true},
     age: {type: Number, required: true},
@@ -19,18 +25,19 @@ const sampleSchema = new mongoose.Schema({
 timestamps: true}
 )
 const sampleModel = mongoose.model('people', sampleSchema)
-const createCollection= async  () => {
+
+
+const createCollection= async  (collectionName) => {
     try{
-        const result = await sampleModel.create({ name: 'Mahi', age: 30, address: "Coxsbazar" })
-        console.log('new data is added'+ result)
+        await mongoose.connection.createCollection(collectionName)
+        console.log('collection is created'+ result)
     }catch(err){
-        console.log("data is not added")
+        console.log("collection can't created")
     }
 }
 const removeCollection = async (CollectionName) => {
     try{
-        const CollectionName = 'peoples'
-        const result = await mongoose.connection.dropCollection(CollectionName)
+        await mongoose.connection.dropCollection(CollectionName)
         console.log('collection remove success', result)
     }catch(err){
         console.error('Error removing collection:', err);
@@ -40,22 +47,20 @@ const removeCollection = async (CollectionName) => {
 const insertDocument = async (CollectionName, document) => {
     try {
         const Model = mongoose.model(collectionName);
-        const document = new Model(data);
-        await document.save();
+        const newdocument = new Model(document)
+        await newdocument.save();
         console.log("data insert successfully")
       } catch (error) {
         console.log("data can't insert.")
       }
 
 }
-const deleteDocument = async ( documentId) => {
+const deleteDocument = async (collectionName, filter) => {
     try{
-        const result = await sampleModel.findByIdAndRemove(documentId)
-        if (result){
-            console.log("Document delete successfully")
-        }else{
-            console.log("Document can't delete")
-        }
+       const Model = mongoose.model(collectionName, new mongoose.Schema({}))
+       await Model.deleteOne(filter)
+        console.log("Document delete successfully")
+       
     }catch(err){
         console.log("Error!!! deleting document")
     }
@@ -63,6 +68,7 @@ const deleteDocument = async ( documentId) => {
 }
 
 module.exports = { 
+    connectDB,
     createCollection,
     removeCollection,
     insertDocument, 
